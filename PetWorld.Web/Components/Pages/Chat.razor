@@ -1,0 +1,77 @@
+@page "/chat"
+@rendermode InteractiveServer
+@using MediatR
+@using PetWorld.Application.UseCases.SendMessage
+@using PetWorld.Domain.Interfaces
+@inject IMediator Mediator
+
+<PageTitle>PetWorld — Chat</PageTitle>
+
+<MudText Typo="Typo.h5" Class="mb-4">Chat z asystentem PetWorld</MudText>
+
+<MudTextField @bind-Value="_question"
+              Label="Twoje pytanie"
+              Variant="Variant.Outlined"
+              Lines="3"
+              Class="mb-3"
+              Disabled="@_isLoading" />
+
+<MudButton Variant="Variant.Filled"
+           Color="Color.Primary"
+           OnClick="SendMessage"
+           Disabled="@(_isLoading || string.IsNullOrWhiteSpace(_question))">
+    @if (_isLoading)
+    {
+        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+        <span>Przetwarzam...</span>
+    }
+    else
+    {
+        <span>Wyślij</span>
+    }
+</MudButton>
+
+@if (_result is not null)
+{
+    <MudCard Class="mt-4">
+        <MudCardContent>
+            <MudText Typo="Typo.subtitle2" Color="Color.Primary" Class="mb-2">
+                Odpowiedź (iteracje Writer-Critic: @_result.Iterations/3)
+            </MudText>
+            <MudText Style="white-space: pre-wrap">@_result.Answer</MudText>
+        </MudCardContent>
+    </MudCard>
+}
+
+@if (_error is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mt-4">@_error</MudAlert>
+}
+
+@code {
+    private string _question = string.Empty;
+    private AgentResult? _result;
+    private string? _error;
+    private bool _isLoading;
+
+    private async Task SendMessage()
+    {
+        _error = null;
+        _result = null;
+        _isLoading = true;
+
+        try
+        {
+            _result = await Mediator.Send(new SendMessageCommand(_question));
+            _question = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            _error = $"Błąd: {ex.Message}";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}
