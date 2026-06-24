@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="PetWorld.Application/PetWorld.Application.csproj" />
+  <Project Path="PetWorld.Domain/PetWorld.Domain.csproj" />
+  <Project Path="PetWorld.Infrastructure/PetWorld.Infrastructure.csproj" />
+  <Project Path="PetWorld.Tests/PetWorld.Tests.csproj" />
+  <Project Path="PetWorld.Web/PetWorld.Web.csproj" />
+</Solution>
