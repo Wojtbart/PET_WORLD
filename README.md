@@ -1,76 +1,51 @@
-# PetWorld — AI Chat dla sklepu zoologicznego
+# PetWorld
 
-Sklep internetowy z AI chatem opartym na systemie Writer-Critic (Microsoft Agent Framework).
-Zbudowany w Blazor Server z Onion/Clean Architecture.
+Sklep zoologiczny z asystentem AI opartym na systemie **Writer-Critic** (Microsoft Agent Framework).
+Blazor Server · Onion Architecture · MySQL · Docker
 
-## Szybki start
+---
 
-### Wymagania
-- Docker Desktop
+## Uruchomienie
 
-### Uruchomienie
+> **Wymagania:** Docker Desktop + klucz API OpenAI w `PetWorld.Web/appsettings.json`
 
-1. Wstaw klucz API OpenAI w `PetWorld.Web/appsettings.json`:
-   ```json
-   { "OpenAI": { "ApiKey": "sk-twój-klucz" } }
-   ```
+```bash
+docker compose up
+```
 
-2. ```bash
-   docker compose up
-   ```
+Aplikacja: **http://localhost:5000**
 
-3. Aplikacja: http://localhost:5000
+---
 
 ## Architektura
 
-Onion/Clean Architecture — 4 projekty .NET. Zależności idą tylko do centrum (Domain nie zna żadnej biblioteki zewnętrznej).
+Onion/Clean Architecture — 4 warstwy, zależności tylko do centrum:
 
 ```
-PetWorld.Domain          ← centrum, zero zewnętrznych zależności
-    Entities/ChatMessage.cs
-    Interfaces/IChatRepository.cs
-    Interfaces/IAgentService.cs
-
-PetWorld.Application     ← zależy tylko od Domain
-    UseCases/SendMessage/SendMessageCommand.cs + SendMessageHandler.cs
-    UseCases/GetHistory/GetHistoryQuery.cs + GetHistoryHandler.cs
-
-PetWorld.Infrastructure  ← zależy od Domain + Application
-    Persistence/AppDbContext.cs + ChatRepository.cs  (MySQL + EF Core)
-    Agents/AgentService.cs                           (Microsoft Agent Framework)
-
-PetWorld.Web             ← Blazor Server, zależy od Application
-    Components/Pages/Chat.razor
-    Components/Pages/History.razor
+Domain          ← zero zewnętrznych zależności (encje, interfejsy)
+Application     ← logika biznesowa, CQRS z MediatR
+Infrastructure  ← MySQL (EF Core), Microsoft Agent Framework
+Web             ← Blazor Server UI (MudBlazor)
 ```
 
-## System AI — Writer-Critic
+## System AI — Writer-Critic (max 3 iteracje)
 
-Każde pytanie przechodzi przez pętlę (max 3 iteracje):
+```
+Pytanie → Writer (generuje odpowiedź)
+              ↓
+         Critic (ocenia: approved/feedback)
+              ↓
+     tak → zwróć odpowiedź
+     nie → Writer poprawia z feedbackiem
+```
 
-1. **Writer Agent** (`AIAgent` z MAF) — generuje odpowiedź z rekomendacją produktu z katalogu
-2. **Critic Agent** (`AIAgent` z MAF) — ocenia odpowiedź, zwraca `{"approved": bool, "feedback": "..."}`
-3. Jeśli `approved = false` — Writer dostaje feedback i pisze odpowiedź ponownie
-4. Po max 3 iteracjach (lub po zatwierdzeniu) — zapis do MySQL i wyświetlenie w UI
+## Stack
 
-## Strony
-
-- `/chat` — chat z asystentem PetWorld (pole tekstowe + przycisk Wyślij + odpowiedź z licznikiem iteracji)
-- `/historia` — historia rozmów (DataGrid: Data, Pytanie, Odpowiedź, Iteracje)
-
-## Konfiguracja
-
-| Parametr | Lokalizacja | Opis |
-|---|---|---|
-| `OpenAI:ApiKey` | `appsettings.json` | Klucz API OpenAI |
-| `OpenAI:Model` | `appsettings.json` | Model (domyślnie `gpt-4o-mini`) |
-| `ConnectionStrings:Default` | env/docker-compose | Connection string MySQL |
-
-## Stack technologiczny
-
-- **.NET 8** — Blazor Server
-- **Microsoft.Agents.AI 1.11.0** — framework dla agentów AI
-- **MediatR 12** — CQRS pattern w warstwie Application
-- **EF Core 8 + Pomelo MySQL** — warstwa persystencji
-- **MudBlazor** — komponenty UI
-- **Docker Compose** — uruchomienie jedną komendą
+| Technologia | Rola |
+|---|---|
+| .NET 8 Blazor Server | UI + hosting |
+| Microsoft.Agents.AI 1.11.0 | Agenty Writer i Critic |
+| MediatR 12 | CQRS (Commands/Queries) |
+| EF Core 8 + Pomelo | Persystencja MySQL |
+| MudBlazor 9.5 | Komponenty UI |
+| Docker Compose | Deployment jedną komendą |
