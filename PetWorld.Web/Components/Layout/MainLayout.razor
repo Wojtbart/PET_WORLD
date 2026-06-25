@@ -3,12 +3,13 @@
 <MudThemeProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
+<MudPopoverProvider />
 
 <MudLayout>
     <MudAppBar Elevation="1" Color="Color.Primary">
         <MudText Typo="Typo.h6" Class="mr-4">PetWorld</MudText>
-        <MudNavLink Href="/chat" Match="NavLinkMatch.All" Style="color:white">Chat</MudNavLink>
-        <MudNavLink Href="/historia" Style="color:white">Historia</MudNavLink>
+        <MudButton Href="/chat" Variant="Variant.Text" Style="color:white; font-weight:600">Chat</MudButton>
+        <MudButton Href="/historia" Variant="Variant.Text" Style="color:white; font-weight:600">Historia</MudButton>
     </MudAppBar>
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.Large" Class="mt-6">

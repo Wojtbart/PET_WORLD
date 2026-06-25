@@ -1,5 +1,4 @@
 @page "/chat"
-@rendermode InteractiveServer
 @using MediatR
 @using PetWorld.Application.UseCases.SendMessage
 @using PetWorld.Domain.Interfaces
@@ -9,7 +8,8 @@
 
 <MudText Typo="Typo.h5" Class="mb-4">Chat z asystentem PetWorld</MudText>
 
-<MudTextField @bind-Value="_question"
+<MudTextField Value="@_question" ValueChanged="@((string v) => _question = v)"
+              Immediate="true"
               Label="Twoje pytanie"
               Variant="Variant.Outlined"
               Lines="3"
@@ -67,7 +67,10 @@
         }
         catch (Exception ex)
         {
-            _error = $"Błąd: {ex.Message}";
+            if (ex.Message.Contains("429") || ex.Message.Contains("insufficient_quota"))
+                _error = "Brak kredytów OpenAI. Doładuj konto na platform.openai.com/settings/billing i spróbuj ponownie.";
+            else
+                _error = $"Błąd: {ex.Message}";
         }
         finally
         {

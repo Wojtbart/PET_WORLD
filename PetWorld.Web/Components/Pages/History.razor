@@ -1,5 +1,4 @@
 @page "/historia"
-@rendermode InteractiveServer
 @using MediatR
 @using PetWorld.Application.UseCases.GetHistory
 @using PetWorld.Domain.Entities
@@ -19,14 +18,20 @@ else if (!_messages.Any())
 }
 else
 {
-    <MudDataGrid Items="@_messages" Dense="true" Bordered="true" Striped="true">
-        <Columns>
-            <PropertyColumn Property="x => x.CreatedAt" Title="Data" Format="dd.MM.yyyy HH:mm" />
-            <PropertyColumn Property="x => x.Question" Title="Pytanie" />
-            <PropertyColumn Property="x => x.Answer" Title="Odpowiedź" />
-            <PropertyColumn Property="x => x.Iterations" Title="Iteracje" />
-        </Columns>
-    </MudDataGrid>
+    <MudTable Items="@_messages" Dense="true" Bordered="true" Striped="true">
+        <HeaderContent>
+            <MudTh>Data</MudTh>
+            <MudTh>Pytanie</MudTh>
+            <MudTh>Odpowiedź</MudTh>
+            <MudTh>Iteracje</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.CreatedAt.ToString("dd.MM.yyyy HH:mm")</MudTd>
+            <MudTd>@context.Question</MudTd>
+            <MudTd Style="white-space: pre-wrap">@context.Answer</MudTd>
+            <MudTd>@context.Iterations/3</MudTd>
+        </RowTemplate>
+    </MudTable>
 }
 
 @code {
